@@ -20,10 +20,41 @@ void forwardSelection();
 
 double leave_one_out_cross_validation(vector<vector<double>> instance){ //data, current_set_of_features, j+1)
     for(int i = 0; i < instance.size(); i++){
+        double nearest_neighbor_dist = 0;
+        int nearest_neighbor_loc = 0;
+        int nearest_neighbor_label = 0;
+        bool first = true;
         for(int j = 0; j < instance.size(); j++){
             //check for nearest neighbor
-            cout << "Ask if " << i << " is nearest neighbor with " << j << endl;
+            if(j != i) {
+                double distance = 0;
+                for(int k = 1; k < instance[j].size(); k++){
+                    //string input;
+                    //cout << instance[j][k] << endl;
+                    //cout << instance[j + 1][k] << endl;
+                    double minus = instance[j][k] - instance[j + 1][k];
+                    //cout << minus << endl;
+                    distance += pow(minus, 2);
+                    //cout << distance << endl;
+                    //cin >> input;
+                }
+                double square = sqrt(distance);
+                distance = square;
+                //cout << distance << endl;
+                if((distance < nearest_neighbor_dist) || (first == true)){ //if distance is less than or its the first instance
+                    cout << "updating distance" << endl;
+                    nearest_neighbor_dist = distance;
+                    nearest_neighbor_loc = j;
+                    nearest_neighbor_label = instance[j][0]; //getting what class nearest neighbor is.
+                }
+                
+                cout << "Ask if " << i << " is nearest neighbor with " << j << endl;
+            }
+            cout << "enter j loop" << endl;
         }
+        cout << "hello?" << endl;
+        cout << "Object " << i << " is class " << instance[i][0] << endl;
+        cout << "It's nearest neighbor is " << nearest_neighbor_loc << " which is in class " << nearest_neighbor_label << endl;
     }
 };
 
@@ -34,7 +65,7 @@ int main() {
     string filename = "Ver_2_CS170_Fall_2021_Small_data__28.txt";
     ifstream testfile;
     vector <vector<double>> instance;
-    vector <double> features;
+    //vector <double> empty;
     double numerical_data = 0;
     string content;
     string space;
@@ -42,20 +73,32 @@ int main() {
     
     testfile.open(filename);
     if (testfile.is_open()){
+        int j = 0;
         while(getline(testfile, space)){
-
+            //features = empty;
+            vector <double> features {};
             stringstream line(space);
+            int i = 0;
             while(line >> content) {
+                if( i == 11){
+                     i = 0;
+                }
                 numerical_data = stof(content);
+                //cout << numerical_data << endl;
                 features.push_back(numerical_data);
+                //cout << features[i] << endl;
+                i++;
             }
             instance.push_back(features);
+            //cout << instance[i][j] << endl;
+            j++;
         }
     }
-    cout << setprecision(8);
-    cout << features[1] << endl;
-    cout << instance[1][0] << endl;
-
+    //cout << setprecision(8);
+    //cout << features[1] << endl;
+    //cout << instance[1][1] << endl;
+    //cout << instance[2][1] << endl;
+    cout << instance.size();
     double d = leave_one_out_cross_validation (instance);
 
 
