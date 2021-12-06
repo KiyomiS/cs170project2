@@ -42,7 +42,7 @@ int main() {
     cin >> input;
     
     if (input == 1) {
-        filename = "Ver_2_CS170_Fall_2021_Small_data__86.txt";
+        filename = "Ver_2_CS170_Fall_2021_Small_data__28.txt";
     }
     else if (input == 2) {
         filename = "Ver_2_CS170_Fall_2021_LARGE_data__17.txt";
