@@ -42,7 +42,7 @@ int main() {
     cin >> input;
     
     if (input == 1) {
-        filename = "Ver_2_CS170_Fall_2021_Small_data__28.txt";
+        filename = "Ver_2_CS170_Fall_2021_Small_data__86.txt";
     }
     else if (input == 2) {
         filename = "Ver_2_CS170_Fall_2021_LARGE_data__17.txt";
@@ -79,7 +79,6 @@ int main() {
 };
 
 Node forwardSelection(vector<vector<double>> instance) {
-    Node root;
     Node best;
     int size = 10;
     bool isHere = false;
@@ -140,13 +139,14 @@ double leave_one_out_cross_validation(vector<vector<double>> instance, vector<in
     double correct = 0.0;
     double acc = 0;
     bool isThere = false;
+    double distance = 0;
+    bool first = true;
 
     for(int i = 0; i < instance.size(); i++){   
-        //bool first = true;
+        
         for(int j = 0; j < instance.size(); j++){
             //check for nearest neighbor
             if(j != i) {
-                double distance = 0;
                 for(int k = 1; k < instance[j].size(); k++){
                     //string input;
                     //cout << instance[j][k] << endl;
@@ -158,7 +158,7 @@ double leave_one_out_cross_validation(vector<vector<double>> instance, vector<in
                     }
 
                     if((isThere == true) || (k == addFeature)) { //if feature is in current set then calculate distance
-                        double minus = instance[i][k] - instance[j][k];
+                        //double minus = instance[i][k] - instance[j][k];
                         //cout << minus << endl;
                         distance += pow((instance[i][k] - instance[j][k]), 2);
                         isThere = false;
@@ -169,12 +169,14 @@ double leave_one_out_cross_validation(vector<vector<double>> instance, vector<in
                 double square = sqrt(distance);
                 distance = square;
                 //cout << distance << endl;
-                if((distance < nearest_neighbor_dist) || (j == 0)){ //if distance is less than or its the first instance
+                if((distance < nearest_neighbor_dist) || (j == 0) || (first == true)){ //if distance is less than or its the first instance or its the zeroth instance and j = 1 has to be included
                     // cout << "updating distance" << endl;
                     nearest_neighbor_dist = distance;
                     nearest_neighbor_loc = j;
                     nearest_neighbor_label = instance[j][0]; //getting what class nearest neighbor is.
+                    first = false;
                 }
+                distance = 0;
                 
                 //cout << "Ask if " << i << " is nearest neighbor with " << j << endl;
             }
@@ -183,7 +185,7 @@ double leave_one_out_cross_validation(vector<vector<double>> instance, vector<in
         // cout << "Object " << i << " is class " << instance[i][0] << endl;
         // cout << "It's nearest neighbor is " << nearest_neighbor_loc << " which is in class " << nearest_neighbor_label << endl;
         if (instance[i][0] == nearest_neighbor_label){
-            correct++;
+            correct += 1;
         }
     }
     acc = correct * 100.0 /instance.size();
