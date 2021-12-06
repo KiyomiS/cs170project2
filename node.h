@@ -7,7 +7,11 @@ class Node{
         double accuracy;
         vector<int> features;
     public:
-        Node(){};
+        Node(){
+            features = {};
+            accuracy = 0;
+        };
+        
         Node(Node * parent) {
             this->features = parent->getfeatures();
         }
@@ -19,6 +23,10 @@ class Node{
 
         void setAcc (double acc) {
             this->accuracy = acc;
+        }
+
+        void addFeature(int n) {
+            features.push_back(n);
         }
 
         bool featurePresent(int j){

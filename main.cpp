@@ -18,78 +18,11 @@ using namespace std;
 //     return rand()%100;
 // };
 
-void forwardSelection(vector<vector<double>> instance) {
-    Node root;
-    Node best;
-    int size = 10;
-    vector<double> current_set_of_features;
-    vector<double> feature_to_add_at_this_level;
 
-    for (int i = 1; i < size; i++){
-        cout << "On the " << i << "th level of the search tree" << endl;
-        feature_to_add_at_this_level = {};
-        double best_so_far_accuracy = 0;
-        for(int j = 1; j < size; j++) {
-            if(best.featurePresent(j) == false) {
-                cout << "--Considering adding the " << j << " feature" << endl;
-                double accuracy = leave_one_out_cross_validation(instance); //data, current_set_of_features, j+1);
-                if(accuracy > best_so_far_accuracy){
-                    best_so_far_accuracy = accuracy;
-                    feature_to_add_at_this_level.push_back(j);
-                }
-            }
-        }
-        cout << "On level " << i << " i added feature " << endl;
-    }
-    return;
-};
 
-double leave_one_out_cross_validation(vector<vector<double>> instance){ //data, current_set_of_features, j+1)
-    double nearest_neighbor_dist = 0;
-    int nearest_neighbor_loc = 0;
-    int nearest_neighbor_label = 0;
-    int correct = 0;
-    double acc = 0;
+double leave_one_out_cross_validation(vector<vector<double>> instance, vector<int> current_set, int addFeature);
+void forwardSelection(vector<vector<double>> instance);
 
-    for(int i = 0; i < instance.size(); i++){   
-        //bool first = true;
-        for(int j = 0; j < instance.size(); j++){
-            //check for nearest neighbor
-            if(j != i) {
-                double distance = 0;
-                for(int k = 1; k < instance[j].size(); k++){
-                    //string input;
-                    //cout << instance[j][k] << endl;
-                    //cout << instance[j + 1][k] << endl;
-                    double minus = instance[i][k] - instance[j][k];
-                    //cout << minus << endl;
-                    distance += pow((instance[i][k] - instance[j][k]), 2);
-                    //cout << distance << endl;
-                    //cin >> input;
-                }
-                double square = sqrt(distance);
-                distance = square;
-                //cout << distance << endl;
-                if((distance < nearest_neighbor_dist) || (j == 0)){ //if distance is less than or its the first instance
-                    // cout << "updating distance" << endl;
-                    nearest_neighbor_dist = distance;
-                    nearest_neighbor_loc = j;
-                    nearest_neighbor_label = instance[j][0]; //getting what class nearest neighbor is.
-                }
-                
-                //cout << "Ask if " << i << " is nearest neighbor with " << j << endl;
-            }
-            //cout << "enter j loop" << endl;
-        }
-        // cout << "Object " << i << " is class " << instance[i][0] << endl;
-        // cout << "It's nearest neighbor is " << nearest_neighbor_loc << " which is in class " << nearest_neighbor_label << endl;
-        if (instance[i][0] == nearest_neighbor_label){
-            correct++;
-        }
-    }
-    acc = correct * 100.0 /instance.size();
-    return acc;
-};
 
 int main() {
     int input;
@@ -136,9 +69,109 @@ int main() {
         }
     }
 
-    accuracy = leave_one_out_cross_validation(instance);
-    cout << accuracy << "%" << endl;
+    // accuracy = leave_one_out_cross_validation(instance);
+    // cout << accuracy << "%" << endl;
+
+    forwardSelection(instance);
 
     return 0;
 };
 
+void forwardSelection(vector<vector<double>> instance) {
+    Node root;
+    Node best;
+    int size = 10;
+    bool isHere = false;
+    vector<int> current_set_of_features;
+    int feature_to_add_at_this_level;
+
+    for (int i = 0; i < instance.size(); i++){
+        cout << "On the " << i + 1 << "th level of the search tree" << endl;
+        feature_to_add_at_this_level = {};
+        double best_so_far_accuracy = 0;
+        for(int j = 1; j < instance[i].size(); j++) {
+            
+            for(int l = 0; l < current_set_of_features.size(); l++){
+                if (j == current_set_of_features[l]){
+                    isHere = true;
+                }
+            }
+
+            if(isHere == false) {
+                // Node node = new Node(best);
+                // node.addFeature(j);
+                cout << "--Considering adding the " << j << " feature" << endl;
+                double accuracy = leave_one_out_cross_validation(instance, current_set_of_features, j); //data, current_set_of_features, j+1);
+                //cout << accuracy << endl;
+                if(accuracy > best_so_far_accuracy){
+                    best_so_far_accuracy = accuracy;
+                    feature_to_add_at_this_level = j;
+                    
+                }
+            }
+            isHere = false;
+        }
+        current_set_of_features.push_back(feature_to_add_at_this_level);
+        // best.addFeature(feature_to_add_at_this_level);
+        cout << "On level " << i + 1 << " i added feature " << feature_to_add_at_this_level << endl;
+    }
+    return;
+};
+
+double leave_one_out_cross_validation(vector<vector<double>> instance, vector<int> current_set, int addFeature){ //data, current_set_of_features, j+1)
+    double nearest_neighbor_dist = 0;
+    int nearest_neighbor_loc = 0;
+    int nearest_neighbor_label = 0;
+    double correct = 0.0;
+    double acc = 0;
+    bool isThere = false;
+
+    for(int i = 0; i < instance.size(); i++){   
+        //bool first = true;
+        for(int j = 0; j < instance.size(); j++){
+            //check for nearest neighbor
+            if(j != i) {
+                double distance = 0;
+                for(int k = 1; k < instance[j].size(); k++){
+                    //string input;
+                    //cout << instance[j][k] << endl;
+                    //cout << instance[j + 1][k] << endl;
+                    for(int l = 0; l < current_set.size(); l++){  //find out if feature is in current set or not
+                        if(k == current_set[l]){
+                            isThere = true;
+                        }
+                    }
+
+                    if((isThere == true) || (k == addFeature)) { //if feature is in current set then calculate distance
+                        double minus = instance[i][k] - instance[j][k];
+                        //cout << minus << endl;
+                        distance += pow((instance[i][k] - instance[j][k]), 2);
+                        isThere = false;
+                    }
+                    //cout << distance << endl;
+                    //cin >> input;
+                }
+                double square = sqrt(distance);
+                distance = square;
+                //cout << distance << endl;
+                if((distance < nearest_neighbor_dist) || (j == 0)){ //if distance is less than or its the first instance
+                    // cout << "updating distance" << endl;
+                    nearest_neighbor_dist = distance;
+                    nearest_neighbor_loc = j;
+                    nearest_neighbor_label = instance[j][0]; //getting what class nearest neighbor is.
+                }
+                
+                //cout << "Ask if " << i << " is nearest neighbor with " << j << endl;
+            }
+            //cout << "enter j loop" << endl;
+        }
+        // cout << "Object " << i << " is class " << instance[i][0] << endl;
+        // cout << "It's nearest neighbor is " << nearest_neighbor_loc << " which is in class " << nearest_neighbor_label << endl;
+        if (instance[i][0] == nearest_neighbor_label){
+            correct++;
+        }
+    }
+    acc = correct * 100.0 /instance.size();
+    cout << acc << endl;
+    return acc;
+};
