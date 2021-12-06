@@ -11,7 +11,7 @@ class Node{
             features = {};
             accuracy = 0;
         };
-        
+
         Node(Node * parent) {
             this->features = parent->getfeatures();
         }
@@ -27,6 +27,16 @@ class Node{
 
         void addFeature(int n) {
             features.push_back(n);
+        }
+
+        void print() {
+            for(int i = 0; i < features.size(); i++) {
+                cout << features[i] << " ";
+            }
+        }
+
+        double getAcc (){
+            return accuracy;
         }
 
         bool featurePresent(int j){

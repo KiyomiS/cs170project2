@@ -21,7 +21,7 @@ using namespace std;
 
 
 double leave_one_out_cross_validation(vector<vector<double>> instance, vector<int> current_set, int addFeature);
-void forwardSelection(vector<vector<double>> instance);
+Node forwardSelection(vector<vector<double>> instance);
 
 
 int main() {
@@ -37,6 +37,7 @@ int main() {
     string content;
     string space;
     double accuracy = 0;
+    Node result;
 
     cout << "Which data set would you like to test?\n" << "1. Small\n" << "2. Large.\n" << endl;
     cin >> input;
@@ -72,20 +73,23 @@ int main() {
     // accuracy = leave_one_out_cross_validation(instance);
     // cout << accuracy << "%" << endl;
 
-    forwardSelection(instance);
+    result = forwardSelection(instance);
+    result.print();
 
     return 0;
 };
 
-void forwardSelection(vector<vector<double>> instance) {
+Node forwardSelection(vector<vector<double>> instance) {
     Node root;
     Node best;
     int size = 10;
     bool isHere = false;
     vector<int> current_set_of_features;
     int feature_to_add_at_this_level;
+    vector<int> best_overall;
+    double best_overall_acc = 0.0;
 
-    for (int i = 0; i < instance.size(); i++){
+    for (int i = 0; i < instance[0].size() - 1; i++){
         cout << "On the " << i + 1 << "th level of the search tree" << endl;
         feature_to_add_at_this_level = {};
         double best_so_far_accuracy = 0;
@@ -111,11 +115,23 @@ void forwardSelection(vector<vector<double>> instance) {
             }
             isHere = false;
         }
+
+        if(best_overall.size() == 0) {
+            best_overall.push_back(feature_to_add_at_this_level);
+            best.addFeature(feature_to_add_at_this_level);
+            best.setAcc(best_so_far_accuracy);
+        } else if(best_so_far_accuracy > best_overall_acc){
+            best_overall_acc = best_so_far_accuracy;
+            best.setAcc(best_so_far_accuracy);
+            best_overall.push_back(feature_to_add_at_this_level);
+            best.addFeature(feature_to_add_at_this_level);
+        }
         current_set_of_features.push_back(feature_to_add_at_this_level);
         // best.addFeature(feature_to_add_at_this_level);
         cout << "On level " << i + 1 << " i added feature " << feature_to_add_at_this_level << endl;
+        cout << best_overall_acc << endl;
     }
-    return;
+    return best;
 };
 
 double leave_one_out_cross_validation(vector<vector<double>> instance, vector<int> current_set, int addFeature){ //data, current_set_of_features, j+1)
