@@ -22,6 +22,7 @@
     "ostream": "cpp",
     "iostream": "cpp",
     "iomanip": "cpp",
-    "fstream": "cpp"
+    "fstream": "cpp",
+    "iosfwd": "cpp"
   }
 }
