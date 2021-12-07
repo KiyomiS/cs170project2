@@ -54,6 +54,10 @@ class Node{
             }
         }
 
+        void setfeature(vector<int> feat){
+            this->features = feat;
+        }
+
         bool featurePresent(int j){
             for (int i = 0; i < features.size(); i++){
                 if(features[i] == j){

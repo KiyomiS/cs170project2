@@ -6,6 +6,7 @@
 #include <string>
 #include <limits>
 #include <stdlib.h>
+#include <time.h>
 #include <bits/stdc++.h>
 #include <vector>
 using namespace std;
@@ -42,7 +43,7 @@ int main() {
     cin >> input;
     
     if (input == 1) {
-        filename = "Ver_2_CS170_Fall_2021_Small_data__28.txt";
+        filename = "Ver_2_CS170_Fall_2021_Small_data__61.txt";
     }
     else if (input == 2) {
         filename = "Ver_2_CS170_Fall_2021_LARGE_data__17.txt";
@@ -74,6 +75,7 @@ int main() {
 
     cout << "What algorithm?" << endl;
     cin >> input;
+    clock_t tStart = clock();
     if(input == 1) {
         result = forwardSelection(instance);
     } else if (input == 2){
@@ -82,7 +84,7 @@ int main() {
         cout << "wrong input try again" << endl;
     }
     result.print();
-
+    cout << endl << "Time taken was: " << (double)(clock() - tStart)/CLOCKS_PER_SEC << endl;
     return 0;
 };
 
@@ -174,7 +176,21 @@ Node backwardElimination(vector<vector<double>> instance){
                 //     cout << current_set_of_features[lm] << " ";
                 // }
                 // cout << endl;
-                double accuracy = leave_one_out_cross_validation(instance, current_set_of_features, j, true); //data, current_set_of_features, j+1);
+                int index; 
+                vector<int> temp = current_set_of_features;
+                for(int o = 0; o < temp.size(); o++){
+                    if(temp[o] == j) {
+                        index = o;
+                    }
+                }
+                
+                if(index == temp.size() - 1){ //if its at the back just remove it
+                    temp.pop_back();
+                } else {
+                    swap(temp[index], temp[temp.size() - 1]);
+                    temp.pop_back();
+                }
+                double accuracy = leave_one_out_cross_validation(instance, temp, j, true); //data, current_set_of_features, j+1);
                 //cout << accuracy << endl;
                 if(accuracy > best_so_far_accuracy){
                     best_so_far_accuracy = accuracy;
@@ -185,7 +201,18 @@ Node backwardElimination(vector<vector<double>> instance){
             isHere = false;
         }
 
-        
+        int index; 
+        for(int o = 0; o < current_set_of_features.size(); o++){
+            if(current_set_of_features[o] == feature_to_add_at_this_level) {
+                index = o;
+            }
+        }        
+        if(index == current_set_of_features.size() - 1){ //if its at the back just remove it
+            current_set_of_features.pop_back();
+        } else {
+            swap(current_set_of_features[index], current_set_of_features[current_set_of_features.size() - 1]);
+            current_set_of_features.pop_back();
+        }
 
         if(best.getfeatures().size() == instance[0].size()) {
             
@@ -196,29 +223,20 @@ Node backwardElimination(vector<vector<double>> instance){
         } else if(best_so_far_accuracy > best_overall_acc){
             best_overall_acc = best_so_far_accuracy;
             best.setAcc(best_so_far_accuracy);
-            best.remove(feature_to_add_at_this_level);
-            cout << endl << feature_to_add_at_this_level << endl;
+            best.setfeature(current_set_of_features);
+            //cout << endl << feature_to_add_at_this_level << endl;
         }
-        int index; 
-        for(int o = 0; o < current_set_of_features.size(); o++){
-            if(current_set_of_features[o] == feature_to_add_at_this_level) {
-                index = o;
-            }
-        }
-        
-        if(index == current_set_of_features.size()){ //if its at the back just remove it
-            current_set_of_features.pop_back();
-        } else {
-            swap(current_set_of_features[index], current_set_of_features[current_set_of_features.size() - 1]);
-            current_set_of_features.pop_back();
-        }
-        cout << "current set shit ";
-        cout << current_set_of_features.size() << endl;
 
-        for(int lm = 0; lm < current_set_of_features.size(); lm++){
-            cout << current_set_of_features[lm] << " ";
-        }
-         cout << endl;
+
+        // cout << "current set shit ";
+        // cout << current_set_of_features.size() << endl;
+        // cout << "best set " << endl;
+        // best.print();
+        // cout << endl;
+        // for(int lm = 0; lm < current_set_of_features.size(); lm++){
+        //     cout << current_set_of_features[lm] << " ";
+        // }
+        //  cout << endl;
         // best.addFeature(feature_to_add_at_this_level);
         cout << "On level " << i + 1 << " i removed feature " << feature_to_add_at_this_level << endl;
         cout << best_overall_acc << endl;
@@ -260,7 +278,7 @@ double leave_one_out_cross_validation(vector<vector<double>> instance, vector<in
                             isThere = false;
                         }
                     } else { //backward elim
-                        if((isThere == true) && (k != addFeature)) { //if feature is in current set then calculate distance
+                        if((isThere == true)) { //if feature is in current set then calculate distance
                             distance += pow((instance[i][k] - instance[j][k]), 2);
                             isThere = false;
                         }
