@@ -19,9 +19,9 @@ using namespace std;
 
 
 
-double leave_one_out_cross_validation(vector<vector<double>> instance, vector<int> current_set, int addFeature);
+double leave_one_out_cross_validation(vector<vector<double>> instance, vector<int> current_set, int addFeature, bool rem);
 Node forwardSelection(vector<vector<double>> instance);
-
+Node backwardElimination(vector<vector<double>> instance);
 
 int main() {
     int input;
@@ -49,7 +49,7 @@ int main() {
     } else {
         cout << "Invalid choice. Will use default choice (small)" << endl;
     };
-
+    
     //loading data
     testfile.open(filename);
     if (testfile.is_open()){
@@ -72,7 +72,15 @@ int main() {
     // accuracy = leave_one_out_cross_validation(instance);
     // cout << accuracy << "%" << endl;
 
-    result = forwardSelection(instance);
+    cout << "What algorithm?" << endl;
+    cin >> input;
+    if(input == 1) {
+        result = forwardSelection(instance);
+    } else if (input == 2){
+        result = backwardElimination(instance);
+    } else {
+        cout << "wrong input try again" << endl;
+    }
     result.print();
 
     return 0;
@@ -89,7 +97,7 @@ Node forwardSelection(vector<vector<double>> instance) {
 
     for (int i = 0; i < instance[0].size() - 1; i++){
         cout << "On the " << i + 1 << "th level of the search tree" << endl;
-        feature_to_add_at_this_level = {};
+        feature_to_add_at_this_level = 0;
         double best_so_far_accuracy = 0;
         for(int j = 1; j < instance[i].size(); j++) {
             
@@ -103,7 +111,7 @@ Node forwardSelection(vector<vector<double>> instance) {
                 // Node node = new Node(best);
                 // node.addFeature(j);
                 cout << "--Considering adding the " << j << " feature" << endl;
-                double accuracy = leave_one_out_cross_validation(instance, current_set_of_features, j); //data, current_set_of_features, j+1);
+                double accuracy = leave_one_out_cross_validation(instance, current_set_of_features, j, false); //data, current_set_of_features, j+1);
                 //cout << accuracy << endl;
                 if(accuracy > best_so_far_accuracy){
                     best_so_far_accuracy = accuracy;
@@ -132,7 +140,95 @@ Node forwardSelection(vector<vector<double>> instance) {
     return best;
 };
 
-double leave_one_out_cross_validation(vector<vector<double>> instance, vector<int> current_set, int addFeature){ //data, current_set_of_features, j+1)
+Node backwardElimination(vector<vector<double>> instance){
+    vector<int> current_set_of_features;
+    int feature_to_add_at_this_level;
+    bool isHere = false;
+    Node best;
+    //vector<int> best_overall;
+    double best_overall_acc = 0.0;
+
+    for(int m = 1; m < instance[0].size(); m++){ //populate all features ignore 0 cause that holds class
+        current_set_of_features.push_back(m);
+        best.addFeature(m);
+    }
+
+    for(int i = 0; i < instance[0].size() - 1; i++){
+        cout << "On the " << i << "th level of the search tree" << endl;
+        feature_to_add_at_this_level = 0;
+        double best_so_far_accuracy = 0;
+
+        for(int j = 1; j < instance[i].size(); j++) {
+            
+            for(int l = 0; l < current_set_of_features.size(); l++){
+                if (j == current_set_of_features[l]){
+                    isHere = true;
+                }
+            }
+
+            if(isHere == true) {
+                // Node node = new Node(best);
+                // node.addFeature(j);
+                cout << "--Considering removing the " << j << " feature" << endl;
+                // for(int lm = 0; lm < current_set_of_features.size(); lm++){
+                //     cout << current_set_of_features[lm] << " ";
+                // }
+                // cout << endl;
+                double accuracy = leave_one_out_cross_validation(instance, current_set_of_features, j, true); //data, current_set_of_features, j+1);
+                //cout << accuracy << endl;
+                if(accuracy > best_so_far_accuracy){
+                    best_so_far_accuracy = accuracy;
+                    feature_to_add_at_this_level = j;
+                    
+                }
+            }
+            isHere = false;
+        }
+
+        
+
+        if(best.getfeatures().size() == instance[0].size()) {
+            
+            best.remove(feature_to_add_at_this_level);
+            best.setAcc(best_so_far_accuracy);
+            //best_overall.remove(feature_to_add_at_this_level)
+
+        } else if(best_so_far_accuracy > best_overall_acc){
+            best_overall_acc = best_so_far_accuracy;
+            best.setAcc(best_so_far_accuracy);
+            best.remove(feature_to_add_at_this_level);
+            cout << endl << feature_to_add_at_this_level << endl;
+        }
+        int index; 
+        for(int o = 0; o < current_set_of_features.size(); o++){
+            if(current_set_of_features[o] == feature_to_add_at_this_level) {
+                index = o;
+            }
+        }
+        
+        if(index == current_set_of_features.size()){ //if its at the back just remove it
+            current_set_of_features.pop_back();
+        } else {
+            swap(current_set_of_features[index], current_set_of_features[current_set_of_features.size() - 1]);
+            current_set_of_features.pop_back();
+        }
+        cout << "current set shit ";
+        cout << current_set_of_features.size() << endl;
+
+        for(int lm = 0; lm < current_set_of_features.size(); lm++){
+            cout << current_set_of_features[lm] << " ";
+        }
+         cout << endl;
+        // best.addFeature(feature_to_add_at_this_level);
+        cout << "On level " << i + 1 << " i removed feature " << feature_to_add_at_this_level << endl;
+        cout << best_overall_acc << endl;
+    }
+    //best.remove(2);
+    return best;
+}
+
+
+double leave_one_out_cross_validation(vector<vector<double>> instance, vector<int> current_set, int addFeature, bool rem){ //data, current_set_of_features, j+1)
     double nearest_neighbor_dist = 0;
     int nearest_neighbor_loc = 0;
     int nearest_neighbor_label = 0;
@@ -156,12 +252,18 @@ double leave_one_out_cross_validation(vector<vector<double>> instance, vector<in
                             isThere = true;
                         }
                     }
-
-                    if((isThere == true) || (k == addFeature)) { //if feature is in current set then calculate distance
-                        //double minus = instance[i][k] - instance[j][k];
-                        //cout << minus << endl;
-                        distance += pow((instance[i][k] - instance[j][k]), 2);
-                        isThere = false;
+                    if(rem == false){//forward selection
+                        if((isThere == true) || (k == addFeature)) { //if feature is in current set then calculate distance
+                            //double minus = instance[i][k] - instance[j][k];
+                            //cout << minus << endl;
+                            distance += pow((instance[i][k] - instance[j][k]), 2);
+                            isThere = false;
+                        }
+                    } else { //backward elim
+                        if((isThere == true) && (k != addFeature)) { //if feature is in current set then calculate distance
+                            distance += pow((instance[i][k] - instance[j][k]), 2);
+                            isThere = false;
+                        }
                     }
                     //cout << distance << endl;
                     //cin >> input;

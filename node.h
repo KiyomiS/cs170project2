@@ -39,6 +39,21 @@ class Node{
             return accuracy;
         }
 
+        void remove(int j){
+            int index; 
+            for(int i = 0; i < features.size(); i++){
+                if(features[i] == j) {
+                    index = i;
+                }
+            }
+            if(index == features.size() - 1) {
+                features.pop_back();
+            } else {
+                swap(features[index], features[features.size() - 1]);
+                features.pop_back();
+            }
+        }
+
         bool featurePresent(int j){
             for (int i = 0; i < features.size(); i++){
                 if(features[i] == j){
