@@ -27,7 +27,7 @@ Node backwardElimination(vector<vector<double>> instance);
 int main() {
     int input;
 
-    cout << "Welcome to my project 2." << endl;
+    cout << "Welcome to Kiyomi Sugita's Feature Selection Algorithm." << endl;
     string filename;
     ifstream testfile;
     vector <vector<double>> instance;
@@ -73,17 +73,21 @@ int main() {
     // accuracy = leave_one_out_cross_validation(instance);
     // cout << accuracy << "%" << endl;
 
-    cout << "What algorithm?" << endl;
+    cout << "Select the number with the corresponding algorithm you wish to use:" << endl << "1. Forward Selection" << endl << "2. Backward Elimination" << endl;
     cin >> input;
     clock_t tStart = clock();
     if(input == 1) {
+        cout << "Beginning search" << endl;
         result = forwardSelection(instance);
+        
     } else if (input == 2){
         result = backwardElimination(instance);
     } else {
         cout << "wrong input try again" << endl;
     }
+    cout << "Finished search!! The best feature subset is {";
     result.print();
+    cout << "}, which has an accuracy of " << result.getAcc() << "%" << endl;
     cout << endl << "Time taken was: " << (double)(clock() - tStart)/CLOCKS_PER_SEC << endl;
     return 0;
 };
@@ -112,9 +116,10 @@ Node forwardSelection(vector<vector<double>> instance) {
             if(isHere == false) {
                 // Node node = new Node(best);
                 // node.addFeature(j);
-                cout << "--Considering adding the " << j << " feature" << endl;
+                cout << "--Considering adding the " << j << " feature accuracy is ";
                 double accuracy = leave_one_out_cross_validation(instance, current_set_of_features, j, false); //data, current_set_of_features, j+1);
                 //cout << accuracy << endl;
+                cout << accuracy << " percent" << endl;
                 if(accuracy > best_so_far_accuracy){
                     best_so_far_accuracy = accuracy;
                     feature_to_add_at_this_level = j;
@@ -137,7 +142,9 @@ Node forwardSelection(vector<vector<double>> instance) {
         current_set_of_features.push_back(feature_to_add_at_this_level);
         // best.addFeature(feature_to_add_at_this_level);
         cout << "On level " << i + 1 << " i added feature " << feature_to_add_at_this_level << endl;
-        cout << best_overall_acc << endl;
+        cout << "Feature set {";
+        best.print();
+        cout << "} was best with accuracy: " << best_overall_acc << endl;
     }
     return best;
 };
@@ -228,7 +235,6 @@ Node backwardElimination(vector<vector<double>> instance){
         }
 
 
-        // cout << "current set shit ";
         // cout << current_set_of_features.size() << endl;
         // cout << "best set " << endl;
         // best.print();
